@@ -16,13 +16,14 @@ class Scene:
         self.active_lights = active_lights
 
 class Room:
-    def __init__(self, room_id, current_scene):
+    def __init__(self, room_id, room_type, current_scene):
         self.room_id = room_id
+        self.room_type = room_type
         self.current_scene = current_scene
 
 class Light:
-    def __init__(self, id, is_on, brightness, color_temperature):
-        self.id = id
+    def __init__(self, light_id, is_on, brightness, color_temperature):
+        self.id = light_id
         self.is_on = is_on
         self.brightness = brightness
         self.color_temperature = color_temperature
@@ -57,11 +58,8 @@ def createScene():
             else:
                 is_on = False
     
-
-
             light = Light(light, is_on, brightness, color_temperature)
             active_lights.append(light)
-
 
     print("Select mode: ")
     print("1: Welcome")
@@ -83,19 +81,29 @@ def createScene():
     scene = Scene(mode, active_lights)
     return scene
 
-def showOptions():
-    print("Options:")
-    print("1: Create new scene")
-    print("2. Assign scene to rooms")
-    choice = input("Select option 1 or 2: ")
-    if choice == "1":
-        createScene()
-    elif choice == "2":
-        assignScene()
+
+def assignSceneToRooms():
+    # REQ-001 Scenes can be synchronized automatically to all rooms
+
+    rooms = []
+
+    for room_id in range(1, 51):
+        if room_id <= 40:
+            room_type = "standard"
+        else:
+            room_type = "suite"
+
+        room = Room(room_id, room_type, None)
+        rooms.append(room)
+
+    selectScene = input("Select scene to assign: ")
+    selectRoomType = input("Select room type (standard/suite/all): ")
+
+    for room in rooms:
+        if selectRoomType == "all" or room.room_type == selectRoomType:
+            room.current_scene = selectScene
     
+    print(f"Scene {selectScene} assigned to {selectRoomType} rooms.")
 
-def staffMenu():
-    while True:
-        showOptions()
+assignSceneToRooms()
 
-createScene()
