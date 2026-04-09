@@ -1,3 +1,7 @@
+from rich import print
+from rich.panel import Panel
+from rich.prompt import Prompt
+
 # RoomLight CLI prototype
 # Hotel lighting control system (command-line version)
 
@@ -34,8 +38,8 @@ class Light:
 scenes = []
 
 rooms = []
-for room_id in range(1, 51):
-    if room_id <= 40:
+for room_id in range(1, 16):
+    if room_id <= 10:
         room_type = "standard"
     else:
         room_type = "suite"
@@ -49,50 +53,54 @@ def createScene():
     # REQ-003: The system has scenes for different situations
     # REQ-004: Scenes can be adjusted without an electrician
 
-    print("Select a scene to create")
-    print("1: Welcome")
-    print("2: Relax")
-    print("3: Work")
-    print("4: Night")
+    print(Panel(
+        "[bold white]Select a scene to create[/bold white]\n\n"
+        "[bold cyan]1:[/bold cyan] Welcome\n"
+        "[bold cyan]2:[/bold cyan] Relax\n"
+        "[bold cyan]3:[/bold cyan] Work\n"
+        "[bold cyan]4:[/bold cyan] Night",
+        title="[bold white]Create Scene[/bold white]",
+        width=60,
+        padding=(1, 2)
+    ))
 
     choice = input("Select scene: ")
     print()
 
     if choice == "1":
         mode = "Welcome"
-        print("Started to create Welcome scene")
-        print()
     elif choice == "2":
         mode = "Relax"
-        print("Started to create Relax scene")
-        print()
     elif choice == "3":
         mode = "Work"
-        print("Started to create Work scene")
-        print()
     elif choice == "4":
         mode = "Night"
-        print("Started to create Night scene")
-        print()
 
     active_lights = []
     light_names = ["main", "corners", "bathroom", "reading"]
 
+    print(Panel(
+        f"Started to create {mode} scene",
+        title="[bold white]Light Configuration[/bold white]",
+        width=60,
+        padding=(1, 2)
+    ))
+
     for light in light_names:
-            is_on_input = input(f"Turn on {light}? (y/n): ")
-            if is_on_input == "y":
-                is_on = True
-                brightness = int(input(f"{light} brightness (0-100): "))
-                color_temperature = input(f"{light} color temperature (cold/medium/warm): ")
-                print()
-            else:
-                is_on = False
-                brightness = 0
-                color_temperature = "off"
-                print()
-    
-            light = Light(light, is_on, brightness, color_temperature)
-            active_lights.append(light)
+        is_on_input = input(f"Turn on {light}? (y/n): ")
+        if is_on_input == "y":
+            is_on = True
+            brightness = int(input(f"{light} brightness (0-100): "))
+            color_temperature = input(f"{light} color temperature (cold/medium/warm): ")
+            print()
+        else:
+            is_on = False
+            brightness = 0
+            color_temperature = "off"
+            print()
+
+        light = Light(light, is_on, brightness, color_temperature)
+        active_lights.append(light)
 
     scene = Scene(mode, active_lights)
     scenes.append(scene)
@@ -105,19 +113,21 @@ def createScene():
 def syncSceneToRooms():
     # REQ-001 Scenes can be synchronized automatically to all rooms
 
-    print("Available scenes:")
-    for scene in scenes:
-        print(scene.mode)    
-
+    print(Panel(
+        "[bold white]Available scenes[/bold white]\n\n" +
+        "\n".join(f"[bold cyan]{i}:[/bold cyan] {scene.mode}" for i, scene in enumerate(scenes, start=1)),
+        title="[bold white]Synchronize Scene[/bold white]",
+         width=60,
+         padding=(1, 2)
+    ))
     print()
-    sceneChoice = input("Select scene to synchronize: ")
-    selected_scene = None
-    for scene in scenes:
-        if scene.mode == sceneChoice:
-            selected_scene = scene
-    if selected_scene == None:
-        print("Scene not found.")
+
+    sceneChoice = int(input("Select scene to synchronize: "))
+    if sceneChoice < 1 or sceneChoice > len(scenes):
+        print("Invalid scene selection.")
         return
+
+    selected_scene = scenes[sceneChoice - 1]
 
     roomTypeChoice = input("Select room type (standard/suite/all): ")
     print()
@@ -128,29 +138,49 @@ def syncSceneToRooms():
             if selected_scene not in room.available_scenes:
                 room.available_scenes.append(selected_scene)
     
-    print(f"Scene '{sceneChoice}' synchronized to {roomTypeChoice} rooms.")
+    print(f"Scene '{selected_scene.mode}' synchronized to {roomTypeChoice} rooms.")
     print()
 
     return None
 
 
 def show_available_scenes(rooms):
+    lines = []
+
     for room in rooms:
         scene_names = []
         for scene in room.available_scenes:
             scene_names.append(scene.mode)
-        print(f"Huone {room.room_id}: {', '.join(scene_names)}")
+
+        label = f"{room.room_type.capitalize()} {room.room_id}"
+        lines.append(f"{label:<12} | {', '.join(scene_names)}")
+
+    content = "\n".join(lines)
+
+    print(Panel(
+        content,
+        title="[bold white]Available scenes by room[/bold white]",
+        width=60,
+        padding=(1, 2)
+    ))
 
 
 def showOptions():
-    print("Options:")
-    print("1: Create a new scene")
-    print("2: Synchronize a scene to rooms")
-    print("3: Show synchronized scenes")
-    print("0: Exit")
+    print(Panel(
+        "[bold cyan]1:[/bold cyan] Create a new scene\n"
+        "[bold cyan]2:[/bold cyan] Synchronize a scene to rooms\n"
+        "[bold cyan]3:[/bold cyan] Show synchronized scenes\n"
+        "[bold red]0:[/bold red] Exit",
+        title="[bold white]RoomLight Staff Menu[/bold white]",
+        width=60,
+        padding=(1, 2),
+    ))
 
 
 def staffMenu():
+    print()
+    print("[bold white on blue] RoomLight CLI Prototype [/bold white on blue]")
+    print()
     while True:
         showOptions()
         choice = input("Select option: ")
