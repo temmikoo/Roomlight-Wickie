@@ -15,10 +15,11 @@ class Scene:
         self.active_lights = active_lights
 
 class Room:
-    def __init__(self, room_id, room_type, current_scene):
+    def __init__(self, room_id, room_type, current_scene, available_scenes):
         self.room_id = room_id
         self.room_type = room_type
         self.current_scene = current_scene
+        self.available_scenes = available_scenes
 
 class Light:
     def __init__(self, light_id, is_on, brightness, color_temperature):
@@ -39,7 +40,7 @@ for room_id in range(1, 51):
     else:
         room_type = "suite"
 
-    room = Room(room_id, room_type, None)
+    room = Room(room_id, room_type, None, [])
     rooms.append(room)
 
 # Functions
@@ -124,6 +125,8 @@ def syncSceneToRooms():
     for room in rooms:
         if roomTypeChoice == "all" or room.room_type == roomTypeChoice:
             room.current_scene = selected_scene
+            if selected_scene not in room.available_scenes:
+                room.available_scenes.append(selected_scene)
     
     print(f"Scene '{sceneChoice}' synchronized to {roomTypeChoice} rooms.")
     print()
@@ -131,10 +134,19 @@ def syncSceneToRooms():
     return None
 
 
+def show_available_scenes(rooms):
+    for room in rooms:
+        scene_names = []
+        for scene in room.available_scenes:
+            scene_names.append(scene.mode)
+        print(f"Huone {room.room_id}: {', '.join(scene_names)}")
+
+
 def showOptions():
     print("Options:")
     print("1: Create a new scene")
     print("2: Synchronize a scene to rooms")
+    print("3: Show synchronized scenes")
     print("0: Exit")
 
 
@@ -147,6 +159,8 @@ def staffMenu():
             createScene()
         elif choice == "2":
             syncSceneToRooms()
+        elif choice == "3":
+            show_available_scenes(rooms)
         elif choice == "0":
             break
 
