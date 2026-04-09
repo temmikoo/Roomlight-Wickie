@@ -171,7 +171,7 @@ def showOptions():
         "[bold cyan]2:[/bold cyan] Synchronize a scene to rooms\n"
         "[bold cyan]3:[/bold cyan] Show synchronized scenes\n"
         "[bold red]0:[/bold red] Exit",
-        title="[bold white]RoomLight Staff Menu[/bold white]",
+        title="[bold white]Main Menu[/bold white]",
         width=60,
         padding=(1, 2),
     ))
@@ -195,4 +195,3 @@ def staffMenu():
             break
 
 staffMenu()
-
